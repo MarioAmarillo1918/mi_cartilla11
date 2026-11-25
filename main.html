@@ -1,0 +1,1320 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Cartilla - Sistema Completo de Vacunación</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #f4f4f1;
+    color: #222;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.45;
+  }
+  a { color: #1f5f56; text-decoration: none; }
+  a:hover { color: #123a34; }
+  button { cursor: pointer; font-family: inherit; transition: transform 0.08s ease, background-color 0.15s ease; }
+  button:active { transform: scale(0.98); }
+  .oculto { display: none !important; }
+
+  .card {
+    background: #ffffff;
+    border: 2px solid #222;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 3px 0 rgba(34, 34, 34, 0.06);
+  }
+  .btn-primario {
+    background: #1f7a6d;
+    color: #ffffff;
+    border: 2px solid #16594f;
+    border-radius: 6px;
+    font-weight: 700;
+  }
+  .btn-primario:hover { background: #186257; }
+  .btn-oscuro {
+    background: #222;
+    color: #ffffff;
+    border: 2px solid #222;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  .btn-oscuro:hover { background: #383838; }
+  .btn-secundario {
+    background: #ffffff;
+    color: #222;
+    border: 2px solid #222;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  .btn-secundario:hover { background: #f1f3f5; }
+  .btn-peligro {
+    background: #b91c1c;
+    color: #ffffff;
+    border: 2px solid #991b1b;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  .btn-peligro:hover { background: #991b1b; }
+
+  .input-control {
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 16px;
+    font-family: inherit;
+    color: #222;
+    border: 2px solid #888;
+    border-radius: 6px;
+    background: #ffffff;
+  }
+  .input-control:focus {
+    outline: none;
+    border-color: #1f7a6d;
+    box-shadow: 0 0 0 3px rgba(31, 122, 109, 0.18);
+  }
+
+  .dosis-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #f8fafc;
+  }
+  .dosis-izq {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+  }
+  .dosis-mes {
+    font-weight: 700;
+    color: #1f5f56;
+  }
+  .date-dosis {
+    padding: 4px 8px;
+    font-size: 12px;
+    font-family: inherit;
+    color: #222;
+    border: 1.5px solid #888;
+    border-radius: 5px;
+    background: #fff;
+  }
+  .date-dosis:focus {
+    outline: none;
+    border-color: #1f7a6d;
+  }
+  .date-error {
+    border-color: #b91c1c !important;
+    background: #fef2f2 !important;
+  }
+
+  .tabla-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #222;
+    border-radius: 6px;
+    background: #fff;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 980px;
+  }
+  th, td {
+    border: 1px solid #d0d5dd;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 13px;
+    vertical-align: top;
+  }
+  th {
+    background: #eef2f0;
+    color: #1b2421;
+    font-weight: 700;
+    border-bottom: 2px solid #222;
+  }
+  tbody tr:hover { background: #fafaf7; }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .estado-pill {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: 700;
+    font-size: 11.5px;
+    line-height: 1.3;
+  }
+  .limite-ok { background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; }
+  .limite-alerta { background: #fff8e1; color: #8d6e00; border: 1px solid #ffe082; }
+  .limite-vencido { background: #fdecea; color: #9f1239; border: 1px solid #f5c2c7; }
+  .aviso-destiempo {
+    margin-top: 6px;
+    padding: 6px 8px;
+    border-radius: 5px;
+    background: #fff7ed;
+    border: 1px solid #fdba74;
+    color: #9a3412;
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
+  .error-fecha {
+    margin-top: 6px;
+    padding: 6px 8px;
+    border-radius: 5px;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+    font-weight: 600;
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+  }
+  .modal-box {
+    width: 100%;
+    max-width: 460px;
+    background: #ffffff;
+    border: 2px solid #222;
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  }
+</style>
+</head>
+<body>
+<div style="min-height: 100vh; display: flex; flex-direction: column;">
+
+  <!-- ENCABEZADO -->
+  <header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 32px; background: #ffffff; border-bottom: 2px solid #222;">
+    <a href="#" id="linkInicio" style="display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; color: #222;">
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #1f7a6d; color: #fff; font-size: 16px;">+</span>
+      <span>Mi Cartilla</span>
+    </a>
+    <nav style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+      <span style="font-size: 13px; color: #555; margin-right: 6px;">PVU México · Cartillas Nacionales</span>
+      <button type="button" id="btnNavInicio" class="btn-oscuro" style="min-height: 42px; padding: 0 16px; font-size: 14px;">Perfil / Inicio</button>
+    </nav>
+  </header>
+
+  <!-- VISTA 1: INICIO Y REGISTRO -->
+  <main id="vistaPrincipal" style="flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 36px 32px; display: flex; flex-wrap: wrap; gap: 36px; align-items: flex-start;">
+
+    <section style="flex: 1 1 410px; min-width: 0; display: flex; flex-direction: column; gap: 18px;">
+      <div>
+        <h1 style="margin: 0; font-size: 36px; line-height: 1.15; letter-spacing: -0.02em;">Consulta y da seguimiento a las vacunas de tu familia</h1>
+        <p style="margin: 10px 0 0; font-size: 16.5px; color: #444;">
+          Ingresa la fecha de nacimiento para asignar automáticamente la Cartilla Nacional de Salud correspondiente, marcar cada dosis con su mes y fecha de aplicación, y validar límites de edad.
+        </p>
+      </div>
+
+      <form id="registroForm" class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+        <h2 style="margin: 0; font-size: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">Registrar a una persona</h2>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="nombre" style="font-size: 14.5px; font-weight: 700;">Nombre o apodo</label>
+          <input id="nombre" type="text" required placeholder="Ej. Sofía" class="input-control">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="nacimiento" style="font-size: 14.5px; font-weight: 700;">Fecha de nacimiento</label>
+          <input id="nacimiento" type="date" required class="input-control">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="sexoCartilla" style="font-size: 14.5px; font-weight: 700;">Cartilla de adulto (si aplica de 20 a 59 años)</label>
+          <select id="sexoCartilla" class="input-control">
+            <option value="hombre">Hombre (20 a 59 años)</option>
+            <option value="mujer">Mujer (20 a 59 años)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="relacion" style="font-size: 14.5px; font-weight: 700;">¿Quién es?</label>
+          <select id="relacion" class="input-control">
+            <option value="Soy yo">Soy yo</option>
+            <option value="Mi hija o hijo">Mi hija o hijo</option>
+            <option value="Otro familiar">Otro familiar</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-primario" style="min-height: 48px; padding: 0 20px; display: flex; align-items: center; justify-content: center; font-size: 16.5px; margin-top: 4px;">
+          Guardar y Ver su Cartilla
+        </button>
+      </form>
+    </section>
+
+    <section style="flex: 1 1 540px; min-width: 0; display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <h2 style="margin: 0; font-size: 20px;">Perfiles en la Base de Datos</h2>
+        <span style="font-size: 13px; color: #555;">Clasificación automática por fecha de nacimiento</span>
+      </div>
+      <div id="listaPerfiles" style="display: flex; flex-direction: column; gap: 16px;"></div>
+    </section>
+
+  </main>
+
+  <!-- VISTA 2: DETALLE DE CARTILLA Y TABLA DE VACUNAS -->
+  <main id="vistaEstado" class="oculto" style="flex: 1; width: 100%; max-width: 1320px; margin: 0 auto; padding: 36px 32px; display: flex; flex-direction: column; gap: 22px;">
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; border-bottom: 2px solid #222; padding-bottom: 16px;">
+      <div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+          <button type="button" id="btnRegresar" class="btn-oscuro" style="padding: 8px 16px; font-size: 14px;">← Regresar a Perfiles</button>
+          <button type="button" id="btnEditarActual" class="btn-secundario" style="padding: 8px 16px; font-size: 14px;">Editar perfil</button>
+        </div>
+        <h1 id="detNombre" style="margin: 0; font-size: 30px;">Cartilla Nacional de Salud</h1>
+        <div id="detInfo" style="font-size: 15px; color: #555; margin-top: 4px;"></div>
+      </div>
+      <span id="detEtiqueta" class="badge" style="font-size: 14px; padding: 6px 14px;"></span>
+    </div>
+
+    <div class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+      <div>
+        <h2 style="margin: 0 0 6px 0; font-size: 22px; color: #1f7a6d;">Esquema Oficial por Dosis, Mes de Aplicación y Límites de Edad</h2>
+        <p style="margin: 0; font-size: 14px; color: #555;">
+          Cada vacuna muestra sus cuadros por dosis con el mes/etapa de aplicación y, justo enfrente de cada cuadro, el campo para su <strong>fecha de aplicación</strong>. Si la persona ya rebasó la edad máxima hoy, se avisa que hoy ya no es posible aplicarla, pero puedes marcar la casilla e indicar la fecha si se aplicó antes de cumplir el límite.
+        </p>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 165px;">Vacuna</th>
+              <th style="width: 210px;">Qué previene (Para qué sirve)</th>
+              <th style="width: 170px;">Dosis y esquema</th>
+              <th style="width: 215px;">Edad límite / Validación</th>
+              <th style="min-width: 310px;">Dosis (mes de aplicación) y fecha</th>
+              <th style="width: 125px;">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tablaVacunasCuerpo"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL PARA EDITAR PERFIL -->
+  <div id="modalEditar" class="modal-backdrop oculto" role="dialog" aria-modal="true" aria-labelledby="tituloModalEditar">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
+        <h2 id="tituloModalEditar" style="margin: 0; font-size: 20px;">Editar información del perfil</h2>
+        <button type="button" id="btnCerrarModal" class="btn-secundario" style="padding: 4px 10px; font-size: 13px;">✕</button>
+      </div>
+
+      <form id="formEditarPerfil" style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <label for="editNombre" style="font-size: 14px; font-weight: 700;">Nombre o apodo</label>
+          <input id="editNombre" type="text" required class="input-control">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <label for="editNacimiento" style="font-size: 14px; font-weight: 700;">Fecha de nacimiento</label>
+          <input id="editNacimiento" type="date" required class="input-control">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <label for="editSexoCartilla" style="font-size: 14px; font-weight: 700;">Cartilla de adulto (si aplica de 20 a 59 años)</label>
+          <select id="editSexoCartilla" class="input-control">
+            <option value="hombre">Hombre (20 a 59 años)</option>
+            <option value="mujer">Mujer (20 a 59 años)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <label for="editRelacion" style="font-size: 14px; font-weight: 700;">¿Quién es?</label>
+          <select id="editRelacion" class="input-control">
+            <option value="Soy yo">Soy yo</option>
+            <option value="Mi hija o hijo">Mi hija o hijo</option>
+            <option value="Otro familiar">Otro familiar</option>
+          </select>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;">
+          <button type="button" id="btnCancelarEdicion" class="btn-secundario" style="padding: 9px 16px; font-size: 14px;">Cancelar</button>
+          <button type="submit" class="btn-primario" style="padding: 9px 18px; font-size: 14px;">Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function evalLimiteHoy(edadObj, tipoLimite) {
+    if (tipoLimite === 'hepB_neonatal') {
+      if (edadObj.dias <= 7) return { vencido: false, texto: 'Dentro del límite (' + edadObj.dias + ' de 7 días)', clase: 'limite-ok' };
+      return { vencido: true, texto: 'Edad máxima superada (> 7 días)', clase: 'limite-vencido' };
+    }
+    if (tipoLimite === 'rotavirus') {
+      var vencidoRota = edadObj.mesesTotales > 7 || (edadObj.mesesTotales === 7 && edadObj.diasEnMes >= 30);
+      if (!vencidoRota) return { vencido: false, texto: 'Dentro del límite (< 8 meses)', clase: 'limite-ok' };
+      return { vencido: true, texto: 'Edad máxima superada (≥ 7m 29d)', clase: 'limite-vencido' };
+    }
+    if (tipoLimite === 'hexavalente_neumo') {
+      if (edadObj.mesesTotales < 60) return { vencido: false, texto: 'Dentro del límite (< 5 años)', clase: 'limite-ok' };
+      return { vencido: true, texto: 'Edad máxima superada (≥ 5 años)', clase: 'limite-vencido' };
+    }
+    if (tipoLimite === 'dpt') {
+      if (edadObj.anios < 7) return { vencido: false, texto: 'Dentro del límite (< 7 años)', clase: 'limite-ok' };
+      return { vencido: true, texto: 'Edad máxima superada (≥ 7 años)', clase: 'limite-vencido' };
+    }
+    if (tipoLimite === 'srp') {
+      if (edadObj.anios < 10) return { vencido: false, texto: 'Dentro del límite (< 10 años)', clase: 'limite-ok' };
+      return { vencido: true, texto: 'Edad máxima superada (≥ 10 años)', clase: 'limite-vencido' };
+    }
+    if (tipoLimite === 'bcg') {
+      if (edadObj.anios >= 5) return { vencido: true, texto: 'Edad máxima superada (≥ 5 años)', clase: 'limite-vencido' };
+      if (edadObj.anios >= 1) return { vencido: false, texto: 'Rezagada (< 5 años con valoración)', clase: 'limite-alerta' };
+      return { vencido: false, texto: 'Dentro de edad ideal (< 1 año)', clase: 'limite-ok' };
+    }
+    if (tipoLimite === 'sr_adulto') {
+      if (edadObj.anios <= 39) return { vencido: false, texto: 'Dentro del límite (≤ 39 años)', clase: 'limite-ok' };
+      if (edadObj.anios <= 49) return { vencido: false, texto: 'Límite extendido (salud/brotes ≤ 49a)', clase: 'limite-alerta' };
+      return { vencido: true, texto: 'Límite habitual superado (≥ 50 años)', clase: 'limite-vencido' };
+    }
+    return { vencido: false, texto: 'Sin límite máximo fijo / condicional', clase: 'limite-ok' };
+  }
+
+  function crearEsquemasIniciales() {
+    return {
+      ninos: [
+        {
+          vacuna: 'BCG',
+          previene: 'Formas graves de tuberculosis (meníngea y miliar).',
+          dosis: '1 dosis única al nacer (peso ≥ 2,000 g).',
+          limiteTexto: 'Preferentemente antes de 1 año (excepcionalmente hasta antes de los 5 años).',
+          tipoLimite: 'bcg',
+          dosisList: [
+            { mesLabel: 'Al nacer (1.ª)', check: true, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Hepatitis B (pediátrica)',
+          previene: 'Infección hepática grave y cirrosis/cáncer por virus de hepatitis B.',
+          dosis: '1 dosis en las primeras 24 horas de vida.',
+          limiteTexto: 'Hasta los 7 días de vida (luego se cubre con Hexavalente).',
+          tipoLimite: 'hepB_neonatal',
+          dosisList: [
+            { mesLabel: 'Recién nacido (≤ 7 días)', check: true, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Hexavalente acelular',
+          previene: 'Difteria, tos ferina, tétanos, poliomielitis, hepatitis B y Haemophilus influenzae tipo b.',
+          dosis: '4 dosis: 2, 4 y 6 meses + refuerzo a los 18 meses.',
+          limiteTexto: 'Hasta 4 años, 11 meses y 29 días (59 meses y 29 días).',
+          tipoLimite: 'hexavalente_neumo',
+          dosisList: [
+            { mesLabel: '2 meses', check: true, fecha: '' },
+            { mesLabel: '4 meses', check: true, fecha: '' },
+            { mesLabel: '6 meses', check: true, fecha: '' },
+            { mesLabel: '18 meses (Refuerzo)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Rotavirus',
+          previene: 'Gastroenteritis y diarrea severa deshidratante por rotavirus.',
+          dosis: '2 dosis (2 y 4 meses) o 3 dosis (2, 4 y 6 meses).',
+          limiteTexto: 'Hasta 7 meses y 29 días (nunca a partir de los 8 meses).',
+          tipoLimite: 'rotavirus',
+          dosisList: [
+            { mesLabel: '2 meses', check: true, fecha: '' },
+            { mesLabel: '4 meses', check: true, fecha: '' },
+            { mesLabel: '6 meses', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Neumocócica conjugada',
+          previene: 'Neumonía, meningitis, otitis y sepsis por Streptococcus pneumoniae.',
+          dosis: '3 dosis: 2, 4 y 12 meses.',
+          limiteTexto: 'Hasta 4 años, 11 meses y 29 días (59 meses y 29 días).',
+          tipoLimite: 'hexavalente_neumo',
+          dosisList: [
+            { mesLabel: '2 meses', check: false, fecha: '' },
+            { mesLabel: '4 meses', check: false, fecha: '' },
+            { mesLabel: '12 meses', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'SRP (Triple Viral)',
+          previene: 'Sarampión, rubéola y parotiditis (paperas).',
+          dosis: '2 dosis: 12 y 18 meses (+ dosis cero 6-11 m según lineamiento 2026).',
+          limiteTexto: 'Hasta 9 años, 11 meses y 29 días (desde 10 años se usa SR).',
+          tipoLimite: 'srp',
+          dosisList: [
+            { mesLabel: '12 meses', check: false, fecha: '' },
+            { mesLabel: '18 meses (o 6 años)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'DPT (Triple Bacteriana)',
+          previene: 'Refuerzo contra difteria, tos ferina y tétanos.',
+          dosis: '1 dosis de refuerzo a los 4 años.',
+          limiteTexto: 'Hasta 6 años, 11 meses y 29 días.',
+          tipoLimite: 'dpt',
+          dosisList: [
+            { mesLabel: '4 años (Refuerzo)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Influenza estacional',
+          previene: 'Complicaciones respiratorias graves por virus de influenza A y B.',
+          dosis: '2 dosis iniciales (6 y 7 meses) + 1 refuerzo anual hasta los 59 meses.',
+          limiteTexto: 'Sin límite superior (desde 5 años aplica si hay factores de riesgo).',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: '6 meses (1.ª)', check: false, fecha: '' },
+            { mesLabel: '7 meses (2.ª)', check: false, fecha: '' },
+            { mesLabel: 'Anual (Refuerzo)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'COVID-19',
+          previene: 'Formas graves y hospitalización por SARS-CoV-2.',
+          dosis: '2 dosis iniciales (6 y 7 meses) + 1 refuerzo anual hasta los 59 meses.',
+          limiteTexto: 'Sin límite superior (desde 5 años aplica a población con comorbilidades).',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: '6 meses (1.ª)', check: false, fecha: '' },
+            { mesLabel: '7 meses (2.ª)', check: false, fecha: '' },
+            { mesLabel: 'Anual (Refuerzo)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Hepatitis A',
+          previene: 'Infección hepática aguda transmitida por agua o alimentos contaminados.',
+          dosis: '1 dosis única a los 12 o 18 meses (incorporación universal 2025-2026).',
+          limiteTexto: 'Población infantil sin antecedente vacunal (consultar disponibilidad).',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: '12 a 18 meses', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Varicela',
+          previene: 'Infección por virus varicela-zóster y sus complicaciones.',
+          dosis: '1 dosis a los 12 meses.',
+          limiteTexto: 'Aplica en guarderías/estancias infantiles o población de riesgo.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: '12 meses', check: false, fecha: '' }
+          ]
+        }
+      ],
+
+      adolescentes: [
+        {
+          vacuna: 'VPH (Virus del Papiloma Humano)',
+          previene: 'Cáncer cervicouterino, anal, orofaríngeo y verrugas genitales.',
+          dosis: '1 dosis única en 5.º de primaria o a los 11 años (y campañas vigentes).',
+          limiteTexto: 'Rezagadas hasta 14-15 años en sector público (VIH/alto riesgo hasta mayor edad).',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: '11 años / 5.º primaria', check: true, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Td (Tétanos y Difteria)',
+          previene: 'Tétanos y difteria.',
+          dosis: 'Refuerzo a los 15 años (o 3 dosis: 0, 1 y 12 meses si no tiene esquema).',
+          limiteTexto: 'Sin límite de edad; refuerzo cada 10 años de por vida.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: '15 años / Mes 0', check: false, fecha: '' },
+            { mesLabel: 'Mes 1 (sin esquema)', check: false, fecha: '' },
+            { mesLabel: 'Mes 12 (sin esquema)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'SR (Doble Viral)',
+          previene: 'Sarampión y rubéola.',
+          dosis: '1 dosis (con 1 dosis previa de SRP) o 2 dosis separadas por 4 semanas.',
+          limiteTexto: 'De 10 hasta 39 o 49 años según lineamiento epidemiológico.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: '1.ª dosis SR', check: false, fecha: '' },
+            { mesLabel: '2.ª dosis SR (+4 sem.)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Hepatitis B',
+          previene: 'Infección hepática crónica por virus B.',
+          dosis: '3 dosis (0, 1 y 6 m de 10 mcg) o 2 dosis (0 y 1 m de 20 mcg) desde 11 años.',
+          limiteTexto: 'Solo para quienes no recibieron las 3 dosis en la infancia.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Mes 0', check: false, fecha: '' },
+            { mesLabel: 'Mes 1', check: false, fecha: '' },
+            { mesLabel: 'Mes 6', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Tdpa (Embarazo adolescente)',
+          previene: 'Tos ferina neonatal, tétanos y difteria.',
+          dosis: '1 dosis en cada embarazo desde semana 20 (óptimo semanas 27 a 36).',
+          limiteTexto: 'Durante el embarazo.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Sem. 20+ (ideal 27-36)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Influenza y COVID-19',
+          previene: 'Infecciones respiratorias agudas graves.',
+          dosis: '1 dosis anual de cada una en temporada invernal.',
+          limiteTexto: 'Aplica si tiene comorbilidades o embarazo.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Influenza (anual)', check: false, fecha: '' },
+            { mesLabel: 'COVID-19 (anual)', check: false, fecha: '' }
+          ]
+        }
+      ],
+
+      adultoHombre: [
+        {
+          vacuna: 'Td (Tétanos y Difteria)',
+          previene: 'Tétanos y difteria.',
+          dosis: '1 refuerzo cada 10 años (o 3 dosis: 0, 1 y 12 meses sin esquema).',
+          limiteTexto: 'Sin límite de edad.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Cada 10 años / Mes 0', check: true, fecha: '' },
+            { mesLabel: 'Mes 1 (sin esquema)', check: false, fecha: '' },
+            { mesLabel: 'Mes 12 (sin esquema)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'SR (Doble Viral)',
+          previene: 'Sarampión y rubéola.',
+          dosis: '1 dosis (esquema incompleto) o 2 dosis con 4 semanas de diferencia.',
+          limiteTexto: 'Hasta los 39 años (o 49 años en personal de salud, docentes o brotes).',
+          tipoLimite: 'sr_adulto',
+          dosisList: [
+            { mesLabel: '1.ª dosis SR', check: false, fecha: '' },
+            { mesLabel: '2.ª dosis SR (+4 sem.)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Influenza estacional',
+          previene: 'Gripe grave y neumonía viral.',
+          dosis: '1 dosis anual (octubre a marzo).',
+          limiteTexto: 'Con factores de riesgo (diabetes, HTA, obesidad mórbida, EPOC, VIH) o salud.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Anual (Oct–Mar)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'COVID-19',
+          previene: 'Enfermedad grave por SARS-CoV-2.',
+          dosis: '1 dosis anual en campaña invernal.',
+          limiteTexto: 'Población de 20 a 59 años con comorbilidades de riesgo y personal de salud.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Anual (Invernal)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Hepatitis B',
+          previene: 'Hepatitis B y daño hepático crónico.',
+          dosis: '3 dosis (0, 1 y 6 meses) o 2 dosis (0 y 1 mes).',
+          limiteTexto: 'Grupos de riesgo (salud, hemodiálisis, VIH, múltiples parejas).',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Mes 0', check: false, fecha: '' },
+            { mesLabel: 'Mes 1', check: false, fecha: '' },
+            { mesLabel: 'Mes 6', check: false, fecha: '' }
+          ]
+        }
+      ],
+
+      adultoMujer: [
+        {
+          vacuna: 'Td (Tétanos y Difteria)',
+          previene: 'Tétanos y difteria.',
+          dosis: '1 refuerzo cada 10 años (o 3 dosis: 0, 1 y 12 meses sin esquema).',
+          limiteTexto: 'Sin límite de edad.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Cada 10 años / Mes 0', check: true, fecha: '' },
+            { mesLabel: 'Mes 1 (sin esquema)', check: false, fecha: '' },
+            { mesLabel: 'Mes 12 (sin esquema)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Tdpa (Embarazo)',
+          previene: 'Transfiere anticuerpos al bebé contra tos ferina grave, tétanos y difteria.',
+          dosis: '1 dosis en cada embarazo desde semana 20 (óptimo semanas 27 a 36).',
+          limiteTexto: 'Sin límite de edad mientras exista embarazo.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Sem. 20+ (ideal 27-36)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'VSR (Virus Sincitial Respiratorio)',
+          previene: 'Bronquiolitis y neumonía grave por VSR en el recién nacido hasta 6 meses.',
+          dosis: '1 dosis durante el embarazo entre las semanas 32 y 36 (lineamiento 2026).',
+          limiteTexto: 'Exclusiva entre semanas 32 y 36 de gestación.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Semanas 32 a 36', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Influenza y COVID-19',
+          previene: 'Complicaciones respiratorias graves en la madre y parto prematuro.',
+          dosis: '1 dosis anual de cada una (cualquier trimestre en embarazo / temporada).',
+          limiteTexto: 'En embarazo o con comorbilidades / grupos de riesgo.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Influenza (anual)', check: false, fecha: '' },
+            { mesLabel: 'COVID-19 (anual)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'SR (Doble Viral)',
+          previene: 'Sarampión, rubéola y síndrome de rubéola congénita en futuros embarazos.',
+          dosis: '1 dosis (esquema incompleto) o 2 dosis con 4 semanas de diferencia.',
+          limiteTexto: 'Contraindicada en embarazo; aplicar 1-3 meses antes. Límite 39-49 años.',
+          tipoLimite: 'sr_adulto',
+          dosisList: [
+            { mesLabel: '1.ª dosis SR', check: false, fecha: '' },
+            { mesLabel: '2.ª dosis SR (+4 sem.)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Hepatitis B',
+          previene: 'Hepatitis B y daño hepático crónico.',
+          dosis: '3 dosis (0, 1 y 6 meses) o 2 dosis (0 y 1 mes).',
+          limiteTexto: 'Grupos de riesgo (salud, hemodiálisis, VIH, múltiples parejas).',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Mes 0', check: false, fecha: '' },
+            { mesLabel: 'Mes 1', check: false, fecha: '' },
+            { mesLabel: 'Mes 6', check: false, fecha: '' }
+          ]
+        }
+      ],
+
+      adultosMayores: [
+        {
+          vacuna: 'Antineumocócica (Conjugada / Polisacárida)',
+          previene: 'Neumonía bacteriana, meningitis y bacteriemia por neumococo.',
+          dosis: '1 dosis única a partir de los 60 años (o esquema secuencial según indicación).',
+          limiteTexto: 'Sin límite de edad (desde los 60 años en adelante).',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: '60 años y más', check: true, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Influenza estacional',
+          previene: 'Neumonía viral, descompensación cardiaca y muerte por influenza.',
+          dosis: '1 dosis anual cada temporada invernal.',
+          limiteTexto: 'Sin límite de edad (universal desde los 60 años).',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Anual (Invernal)', check: true, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'COVID-19',
+          previene: 'Hospitalización y mortalidad por SARS-CoV-2.',
+          dosis: '1 dosis anual cada temporada invernal.',
+          limiteTexto: 'Sin límite de edad (universal desde los 60 años).',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Anual (Invernal)', check: false, fecha: '' }
+          ]
+        },
+        {
+          vacuna: 'Td (Tétanos y Difteria)',
+          previene: 'Tétanos y difteria.',
+          dosis: '1 refuerzo cada 10 años (o 3 dosis: 0, 1 y 12 meses sin esquema).',
+          limiteTexto: 'Sin límite de edad.',
+          tipoLimite: 'abierto',
+          dosisList: [
+            { mesLabel: 'Cada 10 años / Mes 0', check: false, fecha: '' },
+            { mesLabel: 'Mes 1 (sin esquema)', check: false, fecha: '' },
+            { mesLabel: 'Mes 12 (sin esquema)', check: false, fecha: '' }
+          ]
+        }
+      ]
+    };
+  }
+
+  function parsearFechaLocal(fechaStr) {
+    if (!fechaStr) return null;
+    var partes = fechaStr.split('-').map(Number);
+    if (partes.length !== 3 || partes.some(isNaN)) return null;
+    return new Date(partes[0], partes[1] - 1, partes[2]);
+  }
+
+  function obtenerHoyLocal() {
+    var hoy = new Date();
+    return new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+  }
+
+  function calcularEdadEntreFechas(fechaNacimientoStr, fechaReferenciaDate) {
+    var hoyLocal = fechaReferenciaDate || obtenerHoyLocal();
+    var nac = parsearFechaLocal(fechaNacimientoStr);
+
+    if (!nac || isNaN(nac.getTime()) || nac > hoyLocal) {
+      return { anios: 0, mesesTotales: 0, dias: 0, diasEnMes: 0, etiquetaCorta: '0 días', valida: false };
+    }
+
+    var dias = Math.floor((hoyLocal - nac) / (1000 * 60 * 60 * 24));
+    var anios = hoyLocal.getFullYear() - nac.getFullYear();
+    var meses = hoyLocal.getMonth() - nac.getMonth();
+    var diasEnMes = hoyLocal.getDate() - nac.getDate();
+
+    if (diasEnMes < 0) {
+      meses--;
+      diasEnMes += new Date(hoyLocal.getFullYear(), hoyLocal.getMonth(), 0).getDate();
+    }
+    if (meses < 0) {
+      anios--;
+      meses += 12;
+    }
+
+    var mesesTotales = anios * 12 + meses;
+    var etiquetaCorta = anios + (anios === 1 ? ' año' : ' años');
+    if (anios === 0) {
+      etiquetaCorta = meses > 0
+        ? meses + (meses === 1 ? ' mes' : ' meses') + ' y ' + diasEnMes + (diasEnMes === 1 ? ' día' : ' días')
+        : dias + (dias === 1 ? ' día' : ' días');
+    } else if (anios < 5) {
+      etiquetaCorta = anios + (anios === 1 ? ' año' : ' años') + ', ' + meses + ' m';
+    }
+
+    return { anios: anios, mesesTotales: mesesTotales, dias: dias, diasEnMes: diasEnMes, etiquetaCorta: etiquetaCorta, valida: true };
+  }
+
+  function obtenerCartillaPorEdad(edadObj, sexoCartilla) {
+    var anios = edadObj.anios;
+    if (anios <= 9) {
+      return {
+        etiqueta: '0 a 9 años',
+        estilo: 'background: #e2f0d9; border: 1px solid #385723; color: #274e13;',
+        tipo: 'ninos',
+        resumen: 'Cartilla de Niñas y Niños (0 a 9 años) con control de dosis, meses y fechas de aplicación.'
+      };
+    }
+    if (anios <= 19) {
+      return {
+        etiqueta: '10 a 19 años',
+        estilo: 'background: #e1f5fe; border: 1px solid #0288d1; color: #01579b;',
+        tipo: 'adolescentes',
+        resumen: 'Cartilla de Adolescentes (10 a 19 años) con VPH, Td, SR, Hepatitis B, Tdpa e Influenza/COVID.'
+      };
+    }
+    if (anios <= 59) {
+      if (sexoCartilla === 'mujer') {
+        return {
+          etiqueta: 'Cartilla de la Mujer (20 a 59)',
+          estilo: 'background: #fce7f3; border: 1px solid #be185d; color: #831843;',
+          tipo: 'adultoMujer',
+          resumen: 'Cartilla de la Mujer (20 a 59 años) incluyendo Td, Tdpa, VSR gestacional, SR e Influenza/COVID.'
+        };
+      }
+      return {
+        etiqueta: 'Cartilla del Hombre (20 a 59)',
+        estilo: 'background: #d9edf7; border: 1px solid #2b6cb0; color: #1a365d;',
+        tipo: 'adultoHombre',
+        resumen: 'Cartilla del Hombre (20 a 59 años) con Td, SR, Influenza, COVID-19 y Hepatitis B.'
+      };
+    }
+    return {
+      etiqueta: '60 años o más',
+      estilo: 'background: #fcf8e3; border: 1px solid #8a6d3b; color: #8a6d3b;',
+      tipo: 'adultosMayores',
+      resumen: 'Cartilla del Adulto Mayor (60 años y más) con Antineumocócica, Influenza, COVID-19 y Td.'
+    };
+  }
+
+  var perfiles = [];
+  var perfilActualId = null;
+  var perfilEditandoId = null;
+
+  function mostrarVistaPrincipal() {
+    perfilActualId = null;
+    document.getElementById('vistaEstado').classList.add('oculto');
+    document.getElementById('vistaPrincipal').classList.remove('oculto');
+    renderizarListaPerfiles();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function eliminarPerfil(id) {
+    var perfil = perfiles.find(function (p) { return p.id === id; });
+    if (!perfil) return;
+
+    var confirmado = window.confirm(
+      '¿Estás seguro de que deseas eliminar el perfil de "' + perfil.nombre + '"?\nEsta acción borrará su registro de la lista.'
+    );
+    if (!confirmado) return;
+
+    perfiles = perfiles.filter(function (p) { return p.id !== id; });
+
+    if (perfilActualId === id) {
+      mostrarVistaPrincipal();
+    } else {
+      renderizarListaPerfiles();
+    }
+  }
+
+  function abrirModalEditar(id) {
+    var perfil = perfiles.find(function (p) { return p.id === id; });
+    if (!perfil) return;
+
+    perfilEditandoId = id;
+    document.getElementById('editNombre').value = perfil.nombre;
+    document.getElementById('editNacimiento').value = perfil.nacimiento;
+    document.getElementById('editSexoCartilla').value = perfil.sexoCartilla || 'hombre';
+    document.getElementById('editRelacion').value = perfil.relacion;
+    document.getElementById('modalEditar').classList.remove('oculto');
+  }
+
+  function cerrarModalEditar() {
+    perfilEditandoId = null;
+    document.getElementById('modalEditar').classList.add('oculto');
+  }
+
+  function verEstadoDetallado(id) {
+    var perfil = perfiles.find(function (p) { return p.id === id; });
+    if (!perfil) return;
+
+    perfilActualId = perfil.id;
+    document.getElementById('vistaPrincipal').classList.add('oculto');
+    document.getElementById('vistaEstado').classList.remove('oculto');
+
+    var edadHoy = calcularEdadEntreFechas(perfil.nacimiento);
+    var tipoEsquema = perfil.info.tipo;
+
+    document.getElementById('detNombre').textContent = 'Cartilla de: ' + perfil.nombre;
+    document.getElementById('detInfo').textContent = 'Edad actual: ' + edadHoy.etiquetaCorta + ' (Nac.: ' + perfil.nacimiento + ') | Relación: ' + perfil.relacion + ' | Secretaría de Salud';
+
+    var elemEtiqueta = document.getElementById('detEtiqueta');
+    elemEtiqueta.textContent = perfil.info.etiqueta;
+    elemEtiqueta.style.cssText = perfil.info.estilo + ' font-size: 14px; font-weight: 700; padding: 6px 14px; border-radius: 20px;';
+
+    var cuerpoTabla = document.getElementById('tablaVacunasCuerpo');
+    cuerpoTabla.innerHTML = '';
+
+    var lista = perfil.esquemas[tipoEsquema] || perfil.esquemas.adultoHombre;
+
+    lista.forEach(function (vacunaObj) {
+      var limiteHoy = evalLimiteHoy(edadHoy, vacunaObj.tipoLimite);
+      var tr = document.createElement('tr');
+
+      var tdVacuna = document.createElement('td');
+      var strong = document.createElement('strong');
+      strong.textContent = vacunaObj.vacuna;
+      tdVacuna.appendChild(strong);
+
+      var tdPreviene = document.createElement('td');
+      tdPreviene.textContent = vacunaObj.previene;
+
+      var tdDosis = document.createElement('td');
+      tdDosis.textContent = vacunaObj.dosis;
+
+      var tdLimite = document.createElement('td');
+      var divLimTexto = document.createElement('div');
+      divLimTexto.style.cssText = 'margin-bottom: 6px; color: #333;';
+      divLimTexto.textContent = vacunaObj.limiteTexto;
+
+      var spanLimBadge = document.createElement('span');
+      spanLimBadge.className = 'estado-pill ' + limiteHoy.clase;
+      spanLimBadge.textContent = limiteHoy.texto;
+
+      var divAvisoDestiempo = document.createElement('div');
+      divAvisoDestiempo.className = 'aviso-destiempo oculto';
+
+      var divErrorFecha = document.createElement('div');
+      divErrorFecha.className = 'error-fecha oculto';
+
+      tdLimite.appendChild(divLimTexto);
+      tdLimite.appendChild(spanLimBadge);
+      tdLimite.appendChild(divAvisoDestiempo);
+      tdLimite.appendChild(divErrorFecha);
+
+      var tdDosisControles = document.createElement('td');
+      var listaControles = document.createElement('div');
+      listaControles.style.cssText = 'display: flex; flex-direction: column; gap: 6px;';
+
+      var tdEstado = document.createElement('td');
+      tdEstado.style.verticalAlign = 'middle';
+      var badgeEstado = document.createElement('span');
+      badgeEstado.className = 'estado-pill';
+      tdEstado.appendChild(badgeEstado);
+
+      var controlesDosis = [];
+
+      vacunaObj.dosisList.forEach(function (dosisObj) {
+        var filaDosis = document.createElement('div');
+        filaDosis.className = 'dosis-fila';
+
+        var izq = document.createElement('div');
+        izq.className = 'dosis-izq';
+
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = Boolean(dosisObj.check);
+        checkbox.style.cssText = 'width: 17px; height: 17px; cursor: pointer; margin: 0;';
+
+        var spanMes = document.createElement('span');
+        spanMes.className = 'dosis-mes';
+        spanMes.textContent = dosisObj.mesLabel;
+
+        izq.appendChild(checkbox);
+        izq.appendChild(spanMes);
+
+        var inputFecha = document.createElement('input');
+        inputFecha.type = 'date';
+        inputFecha.className = 'date-dosis';
+        inputFecha.value = dosisObj.fecha || '';
+        inputFecha.title = 'Fecha de aplicación (' + dosisObj.mesLabel + ')';
+
+        filaDosis.appendChild(izq);
+        filaDosis.appendChild(inputFecha);
+        listaControles.appendChild(filaDosis);
+
+        controlesDosis.push({
+          dosisObj: dosisObj,
+          checkbox: checkbox,
+          inputFecha: inputFecha
+        });
+      });
+
+      tdDosisControles.appendChild(listaControles);
+
+      function refrescarVacuna() {
+        var hoyLocal = obtenerHoyLocal();
+        var fechaNac = parsearFechaLocal(perfil.nacimiento);
+        var errores = [];
+        var avisos = [];
+        var aplicadasCount = 0;
+
+        controlesDosis.forEach(function (ctrl) {
+          ctrl.dosisObj.check = ctrl.checkbox.checked;
+          ctrl.dosisObj.fecha = ctrl.inputFecha.value;
+          ctrl.inputFecha.classList.remove('date-error');
+
+          if (ctrl.dosisObj.check) {
+            aplicadasCount++;
+          }
+
+          if (limiteHoy.vencido && !ctrl.dosisObj.check && !ctrl.dosisObj.fecha) {
+            var msgHoy = 'Aviso (' + ctrl.dosisObj.mesLabel + '): Si se aplicara hoy ya no es posible por superar la edad máxima. Marca la casilla y anota la fecha si se aplicó antes del límite.';
+            if (avisos.indexOf(msgHoy) === -1) avisos.push(msgHoy);
+          } else if (limiteHoy.vencido && ctrl.dosisObj.check && !ctrl.dosisObj.fecha) {
+            var msgDest = 'Registro a destiempo (' + ctrl.dosisObj.mesLabel + '): captura la fecha en que se aplicó para verificar que haya sido antes de cumplir el límite máximo.';
+            if (avisos.indexOf(msgDest) === -1) avisos.push(msgDest);
+          }
+
+          if (ctrl.dosisObj.fecha) {
+            var fAp = parsearFechaLocal(ctrl.dosisObj.fecha);
+            if (!fAp) {
+              ctrl.inputFecha.classList.add('date-error');
+              errores.push('Error en ' + ctrl.dosisObj.mesLabel + ': fecha inválida.');
+            } else if (fechaNac && fAp < fechaNac) {
+              ctrl.inputFecha.classList.add('date-error');
+              errores.push('Error en ' + ctrl.dosisObj.mesLabel + ': fecha anterior al nacimiento.');
+            } else if (fAp > hoyLocal) {
+              ctrl.inputFecha.classList.add('date-error');
+              errores.push('Error en ' + ctrl.dosisObj.mesLabel + ': fecha futura.');
+            } else {
+              var edadEnAplicacion = calcularEdadEntreFechas(perfil.nacimiento, fAp);
+              var evalEnFecha = evalLimiteHoy(edadEnAplicacion, vacunaObj.tipoLimite);
+              if (evalEnFecha.vencido) {
+                ctrl.inputFecha.classList.add('date-error');
+                errores.push('Error en ' + ctrl.dosisObj.mesLabel + ': en esa fecha tenía ' + edadEnAplicacion.etiquetaCorta + ' y rebasaba la edad máxima.');
+              }
+            }
+          }
+        });
+
+        if (avisos.length > 0) {
+          divAvisoDestiempo.classList.remove('oculto');
+          divAvisoDestiempo.textContent = avisos.join(' ');
+        } else {
+          divAvisoDestiempo.classList.add('oculto');
+          divAvisoDestiempo.textContent = '';
+        }
+
+        if (errores.length > 0) {
+          divErrorFecha.classList.remove('oculto');
+          divErrorFecha.textContent = errores.join(' ');
+        } else {
+          divErrorFecha.classList.add('oculto');
+          divErrorFecha.textContent = '';
+        }
+
+        var totalDosis = controlesDosis.length;
+        if (errores.length > 0) {
+          badgeEstado.textContent = 'Revisar fecha';
+          badgeEstado.style.cssText = 'background: #fdecea; color: #9f1239; border: 1px solid #f5c2c7;';
+        } else if (aplicadasCount === totalDosis) {
+          badgeEstado.textContent = 'Completa (' + aplicadasCount + '/' + totalDosis + ')';
+          badgeEstado.style.cssText = 'background: #e2f0d9; color: #274e13; border: 1px solid #a5d6a7;';
+        } else if (aplicadasCount > 0) {
+          badgeEstado.textContent = 'Parcial (' + aplicadasCount + '/' + totalDosis + ')';
+          badgeEstado.style.cssText = 'background: #e0f2fe; color: #075985; border: 1px solid #7dd3fc;';
+        } else {
+          badgeEstado.textContent = 'Pendiente (0/' + totalDosis + ')';
+          badgeEstado.style.cssText = 'background: #fdf2e9; color: #9c5700; border: 1px solid #f5cba7;';
+        }
+      }
+
+      refrescarVacuna();
+      controlesDosis.forEach(function (ctrl) {
+        ctrl.checkbox.addEventListener('change', refrescarVacuna);
+        ctrl.inputFecha.addEventListener('change', refrescarVacuna);
+      });
+
+      tr.appendChild(tdVacuna);
+      tr.appendChild(tdPreviene);
+      tr.appendChild(tdDosis);
+      tr.appendChild(tdLimite);
+      tr.appendChild(tdDosisControles);
+      tr.appendChild(tdEstado);
+      cuerpoTabla.appendChild(tr);
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function crearTarjetaPerfil(perfil) {
+    var edadHoy = calcularEdadEntreFechas(perfil.nacimiento);
+    perfil.info = obtenerCartillaPorEdad(edadHoy, perfil.sexoCartilla);
+
+    var tarjeta = document.createElement('div');
+    tarjeta.className = 'card';
+    tarjeta.style.cssText = 'display: flex; flex-direction: column; gap: 12px;';
+
+    var top = document.createElement('div');
+    top.style.cssText = 'display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;';
+
+    var infoDiv = document.createElement('div');
+    var nombreDiv = document.createElement('div');
+    nombreDiv.style.cssText = 'font-size: 20px; font-weight: 700;';
+    nombreDiv.textContent = perfil.nombre;
+
+    var subDiv = document.createElement('div');
+    subDiv.style.cssText = 'font-size: 14px; color: #555;';
+    subDiv.textContent = 'Edad: ' + edadHoy.etiquetaCorta + ' | Relación: ' + perfil.relacion;
+
+    infoDiv.appendChild(nombreDiv);
+    infoDiv.appendChild(subDiv);
+
+    var badge = document.createElement('span');
+    badge.className = 'badge';
+    badge.style.cssText = perfil.info.estilo;
+    badge.textContent = perfil.info.etiqueta;
+
+    top.appendChild(infoDiv);
+    top.appendChild(badge);
+
+    var hr = document.createElement('hr');
+    hr.style.cssText = 'border: none; border-top: 1px solid #e5e7eb; margin: 0;';
+
+    var desc = document.createElement('div');
+    desc.style.cssText = 'font-size: 13.5px; color: #444;';
+    desc.textContent = perfil.info.resumen;
+
+    var acciones = document.createElement('div');
+    acciones.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end;';
+
+    var btnEditar = document.createElement('button');
+    btnEditar.type = 'button';
+    btnEditar.className = 'btn-secundario';
+    btnEditar.style.cssText = 'padding: 7px 13px; font-size: 13px;';
+    btnEditar.textContent = 'Editar';
+    btnEditar.addEventListener('click', function () {
+      abrirModalEditar(perfil.id);
+    });
+
+    var btnEliminar = document.createElement('button');
+    btnEliminar.type = 'button';
+    btnEliminar.className = 'btn-peligro';
+    btnEliminar.style.cssText = 'padding: 7px 13px; font-size: 13px;';
+    btnEliminar.textContent = 'Eliminar';
+    btnEliminar.addEventListener('click', function () {
+      eliminarPerfil(perfil.id);
+    });
+
+    var btnVer = document.createElement('button');
+    btnVer.type = 'button';
+    btnVer.className = 'btn-primario';
+    btnVer.style.cssText = 'padding: 7px 15px; font-size: 13px;';
+    btnVer.textContent = 'Ver Estado';
+    btnVer.addEventListener('click', function () {
+      verEstadoDetallado(perfil.id);
+    });
+
+    acciones.appendChild(btnEditar);
+    acciones.appendChild(btnEliminar);
+    acciones.appendChild(btnVer);
+
+    tarjeta.appendChild(top);
+    tarjeta.appendChild(hr);
+    tarjeta.appendChild(desc);
+    tarjeta.appendChild(acciones);
+    return tarjeta;
+  }
+
+  function renderizarListaPerfiles() {
+    var contenedor = document.getElementById('listaPerfiles');
+    contenedor.innerHTML = '';
+
+    if (perfiles.length === 0) {
+      var vacio = document.createElement('div');
+      vacio.className = 'card';
+      vacio.style.cssText = 'text-align: center; color: #555; font-size: 14.5px;';
+      vacio.textContent = 'No hay perfiles registrados. Usa el formulario de la izquierda para agregar a una persona.';
+      contenedor.appendChild(vacio);
+      return;
+    }
+
+    perfiles.forEach(function (perfil) {
+      contenedor.appendChild(crearTarjetaPerfil(perfil));
+    });
+  }
+
+  function fechaHaceAnios(anios) {
+    var hoy = obtenerHoyLocal();
+    var d = new Date(hoy.getFullYear() - anios, hoy.getMonth(), hoy.getDate());
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + mm + '-' + dd;
+  }
+
+  document.getElementById('linkInicio').addEventListener('click', function (e) {
+    e.preventDefault();
+    mostrarVistaPrincipal();
+  });
+  document.getElementById('btnNavInicio').addEventListener('click', mostrarVistaPrincipal);
+  document.getElementById('btnRegresar').addEventListener('click', mostrarVistaPrincipal);
+  document.getElementById('btnEditarActual').addEventListener('click', function () {
+    if (perfilActualId !== null) {
+      abrirModalEditar(perfilActualId);
+    }
+  });
+
+  document.getElementById('btnCerrarModal').addEventListener('click', cerrarModalEditar);
+  document.getElementById('btnCancelarEdicion').addEventListener('click', cerrarModalEditar);
+  document.getElementById('modalEditar').addEventListener('click', function (e) {
+    if (e.target === this) cerrarModalEditar();
+  });
+
+  document.getElementById('formEditarPerfil').addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (perfilEditandoId === null) return;
+
+    var perfil = perfiles.find(function (p) { return p.id === perfilEditandoId; });
+    if (!perfil) return;
+
+    var nuevoNombre = document.getElementById('editNombre').value.trim();
+    var nuevaFecha = document.getElementById('editNacimiento').value;
+    var nuevoSexo = document.getElementById('editSexoCartilla').value;
+    var nuevaRelacion = document.getElementById('editRelacion').value;
+
+    if (!nuevoNombre || !nuevaFecha) return;
+
+    var confirmado = window.confirm(
+      '¿Estás seguro de guardar los cambios en el perfil de "' + perfil.nombre + '"?'
+    );
+    if (!confirmado) return;
+
+    perfil.nombre = nuevoNombre;
+    perfil.nacimiento = nuevaFecha;
+    perfil.sexoCartilla = nuevoSexo;
+    perfil.relacion = nuevaRelacion;
+
+    var edadObj = calcularEdadEntreFechas(perfil.nacimiento);
+    perfil.info = obtenerCartillaPorEdad(edadObj, perfil.sexoCartilla);
+
+    cerrarModalEditar();
+    renderizarListaPerfiles();
+
+    if (perfilActualId === perfil.id) {
+      verEstadoDetallado(perfil.id);
+    }
+  });
+
+  document.getElementById('registroForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    var nombre = document.getElementById('nombre').value.trim();
+    var nacimiento = document.getElementById('nacimiento').value;
+    var sexoCartilla = document.getElementById('sexoCartilla').value;
+    var relacion = document.getElementById('relacion').value;
+
+    if (!nombre || !nacimiento) return;
+
+    var edadObj = calcularEdadEntreFechas(nacimiento);
+    var info = obtenerCartillaPorEdad(edadObj, sexoCartilla);
+
+    var nuevoPerfil = {
+      id: Date.now() + Math.floor(Math.random() * 1000),
+      nombre: nombre,
+      nacimiento: nacimiento,
+      sexoCartilla: sexoCartilla,
+      relacion: relacion,
+      info: info,
+      esquemas: crearEsquemasIniciales()
+    };
+
+    perfiles.unshift(nuevoPerfil);
+    renderizarListaPerfiles();
+    document.getElementById('registroForm').reset();
+    verEstadoDetallado(nuevoPerfil.id);
+  });
+
+  var inicialesData = [
+    { nombre: 'Sofía González', nacimiento: fechaHaceAnios(4), relacion: 'Mi hija o hijo', sexoCartilla: 'mujer' },
+    { nombre: 'Carlos Martínez', nacimiento: fechaHaceAnios(41), relacion: 'Soy yo', sexoCartilla: 'hombre' },
+    { nombre: 'María Zárate', nacimiento: fechaHaceAnios(65), relacion: 'Otro familiar', sexoCartilla: 'mujer' }
+  ];
+
+  perfiles = inicialesData.map(function (item, idx) {
+    var edadObj = calcularEdadEntreFechas(item.nacimiento);
+    return {
+      id: idx + 1,
+      nombre: item.nombre,
+      nacimiento: item.nacimiento,
+      sexoCartilla: item.sexoCartilla,
+      relacion: item.relacion,
+      info: obtenerCartillaPorEdad(edadObj, item.sexoCartilla),
+      esquemas: crearEsquemasIniciales()
+    };
+  });
+
+  renderizarListaPerfiles();
+</script>
+</body>
+</html>
